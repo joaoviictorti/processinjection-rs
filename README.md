@@ -33,5 +33,5 @@ You can run with cargo run or the compiled binary directly:
 cargo run
 ```
 ```sh
-processinjection.exe
+target/release/processinjection.exe
 ```
